@@ -5,7 +5,7 @@ Julie Voice Assistant - Minimal Implementation
 STT: Groq Whisper (whisper-large-v3-turbo - cheapest)
 VAD: WebRTC VAD for reliable speech detection
 LLM: Groq with generic insurance knowledge
-TTS: gTTS
+TTS: ElevenLabs (natural) or gTTS (fallback)
 """
 
 import os
@@ -304,11 +304,11 @@ class LLM:
         return "Bonjour, je suis Julie, votre assistante AssuranceVie. Comment puis-je vous aider?"
 
 # ============================================================
-# TTS - Google Text-to-Speech
+# TTS - Text-to-Speech (ElevenLabs or gTTS)
 # ============================================================
 
-class TTS:
-    """Text-to-Speech using gTTS."""
+class TTSgTTS:
+    """Text-to-Speech using gTTS (free, robotic)."""
     
     def __init__(self, language: str = "fr"):
         self.language = language
@@ -316,20 +316,96 @@ class TTS:
     def speak(self, text: str):
         """Convert text to speech and play it."""
         try:
-            # Generate audio
             tts = gTTS(text=text, lang=self.language, slow=False)
             
-            # Save to temp file and play
             with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
                 tts.save(f.name)
                 temp_path = f.name
             
-            # Play on macOS
             os.system(f"afplay {temp_path} 2>/dev/null")
             os.unlink(temp_path)
             
         except Exception as e:
-            print(f"[TTS Error] {e}")
+            print(f"[gTTS Error] {e}")
+
+
+class TTSElevenLabs:
+    """Text-to-Speech using ElevenLabs (natural, paid)."""
+    
+    # French voice IDs from ElevenLabs
+    VOICES = {
+        "charlotte": "XB0fDUnXU5powFXDhCwa",  # Charlotte - French female
+        "thomas": "GBv7mTt0atIp3Br8iCZE",     # Thomas - French male  
+        "default": "XB0fDUnXU5powFXDhCwa",    # Default to Charlotte
+    }
+    
+    def __init__(self, voice: str = "default"):
+        self.api_key = os.getenv("ELEVENLABS_API_KEY")
+        if not self.api_key:
+            raise ValueError("ELEVENLABS_API_KEY not set")
+        
+        self.voice_id = self.VOICES.get(voice, self.VOICES["default"])
+        self.model = "eleven_flash_v2_5"  # Cheapest model with French support
+        self.api_url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
+    
+    def speak(self, text: str):
+        """Convert text to speech and play it."""
+        import urllib.request
+        import json
+        import ssl
+        
+        try:
+            headers = {
+                "Accept": "audio/mpeg",
+                "Content-Type": "application/json",
+                "xi-api-key": self.api_key,
+            }
+            
+            data = json.dumps({
+                "text": text,
+                "model_id": self.model,
+                "voice_settings": {
+                    "stability": 0.7,           # Higher = more consistent, professional
+                    "similarity_boost": 0.8,    # Voice clarity
+                    "style": 0.0,               # Lower = less expressive, more professional
+                    "use_speaker_boost": True,  # Clearer audio
+                }
+            }).encode("utf-8")
+            
+            req = urllib.request.Request(self.api_url, data=data, headers=headers)
+            
+            # Create SSL context (fixes macOS certificate issue)
+            ssl_context = ssl.create_default_context()
+            try:
+                import certifi
+                ssl_context.load_verify_locations(certifi.where())
+            except ImportError:
+                # Fallback: use unverified context (less secure but works)
+                ssl_context = ssl._create_unverified_context()
+            
+            with urllib.request.urlopen(req, context=ssl_context) as response:
+                audio_data = response.read()
+            
+            # Save and play
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
+                f.write(audio_data)
+                temp_path = f.name
+            
+            os.system(f"afplay {temp_path} 2>/dev/null")
+            os.unlink(temp_path)
+            
+        except Exception as e:
+            print(f"[ElevenLabs Error] {e}")
+
+
+def get_tts() -> TTSElevenLabs | TTSgTTS:
+    """Get TTS engine: ElevenLabs if API key set, else gTTS."""
+    if os.getenv("ELEVENLABS_API_KEY"):
+        print("Using ElevenLabs TTS (natural voice)")
+        return TTSElevenLabs()
+    else:
+        print("Using gTTS (set ELEVENLABS_API_KEY for natural voice)")
+        return TTSgTTS()
 
 # ============================================================
 # MAIN - Julie Voice Assistant
@@ -346,7 +422,7 @@ def main():
     stt = STT()
     vad = VAD()
     llm = LLM()
-    tts = TTS()
+    tts = get_tts()
     print("Ready!\n")
     
     # Welcome
