@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --cnp-primary: #003366;
@@ -66,16 +67,10 @@
             gap: 1rem;
         }
 
-        .logo-icon {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.5rem;
+        .logo-img {
+            height: 100px;
+            width: auto;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
         }
 
         .logo-text {
@@ -283,8 +278,6 @@
         .control-button.hangup {
             background: var(--error);
             color: white;
-            width: 80px;
-            height: 80px;
         }
 
         .control-button.hangup:hover {
@@ -293,7 +286,8 @@
         }
 
         .control-button.hangup i {
-            font-size: 2rem;
+            font-size: 1.75rem;
+            color: white;
         }
 
         /* Status indicator */
@@ -413,7 +407,7 @@
     <!-- Pre-call screen -->
     <div class="pre-call" id="preCall">
         <div class="logo-container">
-            <div class="logo-icon">CNP</div>
+            <img src="/static/CNP_Assurances_logo.svg.png" alt="CNP Assurances" class="logo-img">
             <div class="logo-text">Julie</div>
             <div class="logo-subtitle">Assistant Vocal CNP Assurances</div>
         </div>
@@ -453,7 +447,7 @@
                 <i class="ri-mic-line"></i>
             </button>
             <button class="control-button hangup" id="hangupBtn" title="Raccrocher">
-                <i class="ri-phone-off-fill"></i>
+                <i class="fa-solid fa-phone-slash"></i>
             </button>
         </div>
         <p class="talk-hint" id="talkHint">Maintenez le bouton micro pour parler</p>
@@ -679,16 +673,29 @@
 
         // Prepare recorder (but don't start recording)
         function prepareRecorder(stream) {
+            // Store stream for later use - we'll create MediaRecorder each time we record
+            mediaStream = stream;
+            console.log('Recorder prepared with stream');
+        }
+
+        // Create a new MediaRecorder instance
+        function createMediaRecorder() {
+            if (!mediaStream) {
+                console.error('No media stream available');
+                return null;
+            }
+            
             const options = { mimeType: 'audio/webm;codecs=opus' };
+            let recorder;
             
             try {
-                mediaRecorder = new MediaRecorder(stream, options);
+                recorder = new MediaRecorder(mediaStream, options);
             } catch (e) {
                 // Fallback
-                mediaRecorder = new MediaRecorder(stream);
+                recorder = new MediaRecorder(mediaStream);
             }
 
-            mediaRecorder.ondataavailable = async (event) => {
+            recorder.ondataavailable = async (event) => {
                 if (event.data.size > 0 && ws && ws.readyState === WebSocket.OPEN && isRecording) {
                     // Convert to base64 and send
                     const reader = new FileReader();
@@ -698,15 +705,32 @@
                             type: 'audio',
                             audio: base64
                         }));
+                        console.log('Sent audio chunk');
                     };
                     reader.readAsDataURL(event.data);
                 }
             };
+            
+            recorder.onstop = () => {
+                console.log('MediaRecorder stopped');
+            };
+            
+            return recorder;
         }
 
         // Start recording (push to talk - button pressed)
         function startRecordingPTT() {
-            if (!mediaRecorder || isPlaying || isRecording) return;
+            if (isPlaying || isRecording) {
+                console.log('Cannot start recording: playing=' + isPlaying + ', recording=' + isRecording);
+                return;
+            }
+            
+            // Create a fresh MediaRecorder each time
+            mediaRecorder = createMediaRecorder();
+            if (!mediaRecorder) {
+                showError('Erreur microphone');
+                return;
+            }
             
             isRecording = true;
             micBtn.classList.add('recording');
@@ -721,6 +745,7 @@
             
             // Start recording in chunks
             mediaRecorder.start(200);  // Smaller chunks for better responsiveness
+            console.log('Recording started');
         }
 
         // Stop recording (push to talk - button released)

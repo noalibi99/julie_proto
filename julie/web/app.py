@@ -158,10 +158,12 @@ async def get_stats():
     
     # Count claims
     claims = get_claims()
+    all_claims = claims.get_all_claims()
     
     return {
         "total_calls": stats.get("total_calls", 0),
         "total_documents": doc_count,
+        "total_claims": len(all_claims),
         "resolution_rate": stats.get("resolution_rate", 0),
         "avg_duration": stats.get("avg_duration_seconds"),
         "outcomes": stats.get("outcomes", {}),
@@ -210,14 +212,7 @@ async def upload_document(file: UploadFile = File(...)):
     # Ingest into RAG
     try:
         rag = get_rag()
-        loader = DocumentLoader()
-        docs = loader.load_file(str(file_path))
-        
-        if docs:
-            rag.add_documents(docs)
-            chunk_count = len(docs)
-        else:
-            chunk_count = 0
+        chunk_count = rag.ingest_file(str(file_path))
         
         return {
             "success": True,
@@ -340,17 +335,13 @@ class WebCallSession:
     def __init__(self, websocket: WebSocket, agent: Agent):
         self.websocket = websocket
         self.agent = agent
-        self.call_id = str(uuid.uuid4())
-        self.audio_buffer = io.BytesIO()
         self.is_active = True
-        self.is_speaking = False
-        self.silence_frames = 0
-        self.speech_frames = 0
-        self.last_audio_time = datetime.now()
         
-        # Start call logging
+        # Start call logging and store the call_id
         if agent.call_logger:
-            agent.call_logger.start_call()
+            self.call_id = agent.call_logger.start_call()
+        else:
+            self.call_id = str(uuid.uuid4())
     
     async def send_status(self, status: str):
         """Send status update to client."""
@@ -380,43 +371,41 @@ async def call_websocket(websocket: WebSocket):
     """
     WebSocket endpoint for full voice call simulation.
     
-    This replicates the main.py CLI experience on the web:
-    - Receives audio chunks from browser
-    - Uses VAD to detect speech end
-    - Processes with STT -> LLM -> TTS
-    - Streams audio back to browser
+    Uses push-to-talk: user holds button to record, releases to send.
     """
     await websocket.accept()
     
     agent = get_agent()
     session = WebCallSession(websocket, agent)
     
-    # Audio accumulator
+    # Audio accumulator for current turn
     audio_chunks = []
-    silence_count = 0
-    speech_started = False
-    SILENCE_THRESHOLD = 8  # ~2 seconds at 250ms chunks
-    MIN_SPEECH_CHUNKS = 2  # Minimum chunks to consider as speech
+    is_recording = False
     
     try:
         # Send welcome audio
         await session.send_status("speaking")
         welcome_text = agent.welcome()
+        print(f"Julie: {welcome_text}")
         welcome_audio = await synthesize_speech(agent, welcome_text)
         if welcome_audio:
             await session.send_audio(welcome_audio)
         
         await session.send_status("listening")
         
+        # Track call outcome
+        call_outcome = "completed"
+        
         while session.is_active:
             try:
                 # Receive with timeout
                 data = await asyncio.wait_for(
                     websocket.receive_json(),
-                    timeout=60.0  # 1 minute timeout
+                    timeout=120.0  # 2 minute timeout
                 )
             except asyncio.TimeoutError:
-                # Timeout - end call
+                # Timeout - end call as abandoned
+                call_outcome = "abandoned"
                 goodbye = "Au revoir, à bientôt!"
                 await session.send_status("speaking")
                 goodbye_audio = await synthesize_speech(agent, goodbye)
@@ -425,71 +414,76 @@ async def call_websocket(websocket: WebSocket):
                 await session.send_end()
                 break
             
-            if data.get("type") == "audio":
-                # Decode audio chunk
-                audio_base64 = data.get("audio", "")
-                if not audio_base64:
-                    continue
-                
-                try:
-                    audio_bytes = base64.b64decode(audio_base64)
-                    audio_chunks.append(audio_bytes)
-                    
-                    # Simple voice activity detection based on chunk size
-                    # Larger chunks typically indicate more audio activity
-                    if len(audio_bytes) > 500:  # Has some audio
-                        silence_count = 0
-                        speech_started = True
-                    elif speech_started:
-                        silence_count += 1
-                    
-                    # Process when silence detected after speech
-                    if speech_started and silence_count >= SILENCE_THRESHOLD:
-                        if len(audio_chunks) >= MIN_SPEECH_CHUNKS:
-                            await session.send_status("processing")
-                            
-                            # Combine audio chunks
-                            combined_audio = b''.join(audio_chunks)
-                            
-                            # Process the audio
-                            response_audio = await process_voice_turn(
-                                agent, session, combined_audio
-                            )
-                            
-                            if response_audio is None:
-                                # Call ended
-                                await session.send_end()
-                                break
-                        
-                        # Reset for next turn
-                        audio_chunks = []
-                        silence_count = 0
-                        speech_started = False
-                        await session.send_status("listening")
-                
-                except Exception as e:
-                    print(f"Error processing audio chunk: {e}")
+            msg_type = data.get("type", "")
             
-            elif data.get("type") == "playback_done":
+            if msg_type == "start_recording":
+                # User started recording (pressed button)
+                audio_chunks = []
+                is_recording = True
+                print("[Recording started]")
+            
+            elif msg_type == "audio" and is_recording:
+                # Accumulate audio chunks while recording
+                audio_base64 = data.get("audio", "")
+                if audio_base64:
+                    try:
+                        audio_bytes = base64.b64decode(audio_base64)
+                        audio_chunks.append(audio_bytes)
+                    except Exception as e:
+                        print(f"Error decoding audio: {e}")
+            
+            elif msg_type == "stop_recording":
+                # User stopped recording (released button)
+                is_recording = False
+                print(f"[Recording stopped, {len(audio_chunks)} chunks]")
+                
+                if len(audio_chunks) > 0:
+                    await session.send_status("processing")
+                    
+                    # Combine audio chunks
+                    combined_audio = b''.join(audio_chunks)
+                    print(f"[Total audio size: {len(combined_audio)} bytes]")
+                    
+                    # Process the audio
+                    response_audio = await process_voice_turn(
+                        agent, session, combined_audio
+                    )
+                    
+                    if response_audio is None:
+                        # Call ended
+                        await session.send_end()
+                        break
+                    
+                    audio_chunks = []
+                
+                await session.send_status("listening")
+            
+            elif msg_type == "playback_done":
                 # Client finished playing audio, ready to listen
                 await session.send_status("listening")
             
-            elif data.get("type") == "hangup":
-                # User hung up
+            elif msg_type == "hangup":
+                # User hung up - mark as abandoned
+                print("[User hung up]")
+                call_outcome = "abandoned"
                 break
     
     except WebSocketDisconnect:
         print(f"Call {session.call_id} disconnected")
+        call_outcome = "abandoned"
     except Exception as e:
         print(f"Call error: {e}")
+        call_outcome = "error"
+        import traceback
+        traceback.print_exc()
         try:
             await websocket.send_json({"type": "error", "message": str(e)})
         except:
             pass
     finally:
-        # End call logging
+        # End call logging with correct outcome
         if agent.call_logger:
-            agent.call_logger.end_call(session.call_id, "completed")
+            agent.call_logger.end_call(session.call_id, call_outcome)
 
 
 async def process_voice_turn(agent: Agent, session: WebCallSession, audio_data: bytes) -> Optional[bytes]:

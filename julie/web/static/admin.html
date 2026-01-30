@@ -65,17 +65,9 @@
             text-decoration: none;
         }
 
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--cnp-primary);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 0.85rem;
+        .logo-img {
+            height: 45px;
+            width: auto;
         }
 
         .logo-text {
@@ -480,7 +472,7 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <a href="/" class="logo">
-                <div class="logo-icon">CNP</div>
+                <img src="/static/CNP_Assurances_logo.svg.png" alt="CNP Assurances" class="logo-img">
                 <div>
                     <div class="logo-text">Julie</div>
                     <div class="logo-subtitle">Administration</div>
@@ -800,7 +792,7 @@
                 document.getElementById('stat-resolution').textContent = 
                     (data.resolution_rate || 0).toFixed(0) + '%';
                 document.getElementById('stat-documents').textContent = data.total_documents || '0';
-                document.getElementById('stat-claims').textContent = data.calls_with_claims || '0';
+                document.getElementById('stat-claims').textContent = data.total_claims || '0';
                 
                 showToast('Statistiques actualisées');
             } catch (e) {
