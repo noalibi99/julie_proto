@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julie - Appel en cours</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --cnp-primary: #003366;
+            --cnp-secondary: #0066cc;
+            --cnp-accent: #00a0e3;
+            --cnp-dark: #001a33;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--cnp-primary) 0%, var(--cnp-dark) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Call Screen */
+        .call-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Pre-call screen */
+        .pre-call {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .pre-call.hidden {
+            display: none;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .logo-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .call-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--success);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s;
+        }
+
+        .call-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 50px rgba(16, 185, 129, 0.5);
+        }
+
+        .call-button i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .call-hint {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        /* In-call screen */
+        .in-call {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .in-call.active {
+            display: flex;
+        }
+
+        /* Julie Avatar */
+        .julie-avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cnp-accent), var(--cnp-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .julie-avatar i {
+            font-size: 4rem;
+            color: white;
+        }
+
+        /* Audio visualizer rings */
+        .audio-ring {
+            position: absolute;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: none;
+        }
+
+        .audio-ring.ring-1 {
+            width: 200px;
+            height: 200px;
+        }
+
+        .audio-ring.ring-2 {
+            width: 240px;
+            height: 240px;
+        }
+
+        .audio-ring.ring-3 {
+            width: 280px;
+            height: 280px;
+        }
+
+        /* Speaking animation */
+        .julie-avatar.speaking .audio-ring {
+            animation: pulse-ring 1.5s ease-out infinite;
+        }
+
+        .julie-avatar.speaking .ring-2 {
+            animation-delay: 0.3s;
+        }
+
+        .julie-avatar.speaking .ring-3 {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        /* Listening animation */
+        .julie-avatar.listening {
+            animation: listening-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes listening-pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(0, 160, 227, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 30px rgba(0, 160, 227, 0);
+            }
+        }
+
+        /* Call info */
+        .call-info {
+            text-align: center;
+        }
+
+        .caller-name {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .call-status {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .call-status i {
+            font-size: 0.75rem;
+        }
+
+        .call-timer {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 0.5rem;
+        }
+
+        /* Call controls */
+        .call-controls {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .control-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-button i {
+            font-size: 1.75rem;
+        }
+
+        .control-button.mic-button {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .control-button.mic-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .control-button.mic-button.recording {
+            background: var(--error);
+            animation: recording-pulse 0.8s ease-in-out infinite;
+        }
+
+        @keyframes recording-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .control-button.hangup {
+            background: var(--error);
+            color: white;
+            width: 80px;
+            height: 80px;
+        }
+
+        .control-button.hangup:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .control-button.hangup i {
+            font-size: 2rem;
+        }
+
+        /* Status indicator */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        /* Back link */
+        .back-link {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+        /* Connecting overlay */
+        .connecting-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 26, 51, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 100;
+        }
+
+        .connecting-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--cnp-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .connecting-text {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Error message */
+        .error-message {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--error);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .talk-hint {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        .talk-hint.hidden {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">
+        <i class="ri-arrow-left-line"></i>
+        Retour
+    </a>
+
+    <!-- Pre-call screen -->
+    <div class="pre-call" id="preCall">
+        <div class="logo-container">
+            <div class="logo-icon">CNP</div>
+            <div class="logo-text">Julie</div>
+            <div class="logo-subtitle">Assistant Vocal CNP Assurances</div>
+        </div>
+
+        <button class="call-button" id="startCallBtn" title="Démarrer l'appel">
+            <i class="ri-phone-fill"></i>
+        </button>
+
+        <p class="call-hint">Appuyez pour appeler Julie</p>
+    </div>
+
+    <!-- In-call screen -->
+    <div class="in-call" id="inCall">
+        <div class="julie-avatar" id="julieAvatar">
+            <div class="audio-ring ring-1"></div>
+            <div class="audio-ring ring-2"></div>
+            <div class="audio-ring ring-3"></div>
+            <i class="ri-customer-service-2-fill"></i>
+        </div>
+
+        <div class="call-info">
+            <div class="caller-name">Julie</div>
+            <div class="call-status" id="callStatus">
+                <i class="ri-record-circle-fill"></i>
+                <span>Appel en cours</span>
+            </div>
+            <div class="call-timer" id="callTimer">00:00</div>
+        </div>
+
+        <div class="status-indicator" id="statusIndicator">
+            <div class="status-dot"></div>
+            <span id="statusText">Connecté</span>
+        </div>
+
+        <div class="call-controls">
+            <button class="control-button mic-button" id="micBtn" title="Maintenez pour parler">
+                <i class="ri-mic-line"></i>
+            </button>
+            <button class="control-button hangup" id="hangupBtn" title="Raccrocher">
+                <i class="ri-phone-off-fill"></i>
+            </button>
+        </div>
+        <p class="talk-hint" id="talkHint">Maintenez le bouton micro pour parler</p>
+    </div>
+
+    <!-- Connecting overlay -->
+    <div class="connecting-overlay" id="connectingOverlay">
+        <div class="spinner"></div>
+        <div class="connecting-text">Connexion à Julie...</div>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message" id="errorMessage">
+        <i class="ri-error-warning-line"></i>
+        <span id="errorText"></span>
+    </div>
+
+    <script>
+        // Elements
+        const preCall = document.getElementById('preCall');
+        const inCall = document.getElementById('inCall');
+        const startCallBtn = document.getElementById('startCallBtn');
+        const hangupBtn = document.getElementById('hangupBtn');
+        const micBtn = document.getElementById('micBtn');
+        const julieAvatar = document.getElementById('julieAvatar');
+        const callTimer = document.getElementById('callTimer');
+        const statusText = document.getElementById('statusText');
+        const talkHint = document.getElementById('talkHint');
+        const connectingOverlay = document.getElementById('connectingOverlay');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+
+        // State
+        let ws = null;
+        let mediaRecorder = null;
+        let mediaStream = null;
+        let audioContext = null;
+        let callStartTime = null;
+        let timerInterval = null;
+        let isRecording = false;
+        let isCallActive = false;
+        let audioQueue = [];
+        let isPlaying = false;
+
+        // Audio context for playback
+        function getAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        // Show error
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => errorMessage.classList.remove('show'), 5000);
+        }
+
+        // Update timer
+        function updateTimer() {
+            if (!callStartTime) return;
+            const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+            const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const secs = (elapsed % 60).toString().padStart(2, '0');
+            callTimer.textContent = `${mins}:${secs}`;
+        }
+
+        // Set Julie state
+        function setJulieState(state) {
+            julieAvatar.classList.remove('speaking', 'listening');
+            if (state === 'speaking') {
+                julieAvatar.classList.add('speaking');
+                statusText.textContent = 'Julie parle...';
+                talkHint.classList.add('hidden');
+            } else if (state === 'listening') {
+                julieAvatar.classList.add('listening');
+                statusText.textContent = 'Julie écoute...';
+                talkHint.classList.remove('hidden');
+            } else if (state === 'processing') {
+                statusText.textContent = 'Traitement...';
+                talkHint.classList.add('hidden');
+            } else {
+                statusText.textContent = 'Connecté';
+                talkHint.classList.remove('hidden');
+            }
+        }
+
+        // Play audio from base64
+        async function playAudio(base64Audio) {
+            audioQueue.push(base64Audio);
+            if (!isPlaying) {
+                processAudioQueue();
+            }
+        }
+
+        async function processAudioQueue() {
+            if (audioQueue.length === 0) {
+                isPlaying = false;
+                setJulieState('listening');
+                // Tell backend we're done playing
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'playback_done' }));
+                }
+                return;
+            }
+
+            isPlaying = true;
+            setJulieState('speaking');
+
+            const base64Audio = audioQueue.shift();
+            
+            try {
+                const ctx = getAudioContext();
+                const audioData = atob(base64Audio);
+                const arrayBuffer = new ArrayBuffer(audioData.length);
+                const view = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < audioData.length; i++) {
+                    view[i] = audioData.charCodeAt(i);
+                }
+
+                const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+                const source = ctx.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(ctx.destination);
+                
+                source.onended = () => {
+                    processAudioQueue();
+                };
+                
+                source.start(0);
+            } catch (e) {
+                console.error('Error playing audio:', e);
+                processAudioQueue();
+            }
+        }
+
+        // Start call
+        async function startCall() {
+            try {
+                connectingOverlay.classList.add('active');
+
+                // Request microphone access
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 16000
+                    } 
+                });
+
+                // Connect WebSocket
+                const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/call`);
+
+                ws.onopen = () => {
+                    console.log('WebSocket connected');
+                    
+                    // Prepare recorder but don't start yet
+                    prepareRecorder(mediaStream);
+                    
+                    // Show in-call screen
+                    preCall.classList.add('hidden');
+                    inCall.classList.add('active');
+                    connectingOverlay.classList.remove('active');
+                    
+                    // Start timer
+                    callStartTime = Date.now();
+                    timerInterval = setInterval(updateTimer, 1000);
+                    
+                    isCallActive = true;
+                    setJulieState('listening');
+                };
+
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'audio') {
+                        // Play audio response
+                        playAudio(data.audio);
+                    } else if (data.type === 'status') {
+                        // Update status
+                        if (data.status === 'listening') {
+                            setJulieState('listening');
+                        } else if (data.status === 'processing') {
+                            statusText.textContent = 'Traitement...';
+                        } else if (data.status === 'speaking') {
+                            setJulieState('speaking');
+                        }
+                    } else if (data.type === 'end') {
+                        // Call ended by agent
+                        endCall();
+                    } else if (data.type === 'error') {
+                        showError(data.message);
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    showError('Erreur de connexion');
+                    endCall();
+                };
+
+                ws.onclose = () => {
+                    console.log('WebSocket closed');
+                    if (isCallActive) {
+                        endCall();
+                    }
+                };
+
+            } catch (error) {
+                console.error('Error starting call:', error);
+                connectingOverlay.classList.remove('active');
+                
+                if (error.name === 'NotAllowedError') {
+                    showError('Veuillez autoriser l\'accès au microphone');
+                } else {
+                    showError('Erreur lors du démarrage de l\'appel');
+                }
+            }
+        }
+
+        // Prepare recorder (but don't start recording)
+        function prepareRecorder(stream) {
+            const options = { mimeType: 'audio/webm;codecs=opus' };
+            
+            try {
+                mediaRecorder = new MediaRecorder(stream, options);
+            } catch (e) {
+                // Fallback
+                mediaRecorder = new MediaRecorder(stream);
+            }
+
+            mediaRecorder.ondataavailable = async (event) => {
+                if (event.data.size > 0 && ws && ws.readyState === WebSocket.OPEN && isRecording) {
+                    // Convert to base64 and send
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64 = reader.result.split(',')[1];
+                        ws.send(JSON.stringify({
+                            type: 'audio',
+                            audio: base64
+                        }));
+                    };
+                    reader.readAsDataURL(event.data);
+                }
+            };
+        }
+
+        // Start recording (push to talk - button pressed)
+        function startRecordingPTT() {
+            if (!mediaRecorder || isPlaying || isRecording) return;
+            
+            isRecording = true;
+            micBtn.classList.add('recording');
+            talkHint.textContent = 'Parlez maintenant...';
+            setJulieState('');
+            statusText.textContent = 'Vous parlez...';
+            
+            // Notify backend
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'start_recording' }));
+            }
+            
+            // Start recording in chunks
+            mediaRecorder.start(200);  // Smaller chunks for better responsiveness
+        }
+
+        // Stop recording (push to talk - button released)
+        function stopRecordingPTT() {
+            if (!mediaRecorder || !isRecording) return;
+            
+            isRecording = false;
+            micBtn.classList.remove('recording');
+            talkHint.textContent = 'Maintenez le bouton micro pour parler';
+            
+            // Stop recording
+            mediaRecorder.stop();
+            
+            // Notify backend that recording stopped
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'stop_recording' }));
+            }
+            
+            setJulieState('processing');
+        }
+
+        // End call
+        function endCall() {
+            isCallActive = false;
+            isRecording = false;
+            
+            // Stop recording
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            // Stop media stream
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            
+            // Close WebSocket
+            if (ws) {
+                try {
+                    ws.send(JSON.stringify({ type: 'hangup' }));
+                } catch (e) {}
+                ws.close();
+                ws = null;
+            }
+            
+            // Stop timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Clear audio queue
+            audioQueue = [];
+            isPlaying = false;
+            
+            // Reset UI
+            inCall.classList.remove('active');
+            preCall.classList.remove('hidden');
+            connectingOverlay.classList.remove('active');
+            julieAvatar.classList.remove('speaking', 'listening');
+            micBtn.classList.remove('recording');
+            callTimer.textContent = '00:00';
+        }
+
+        // Event listeners
+        startCallBtn.addEventListener('click', startCall);
+        hangupBtn.addEventListener('click', endCall);
+        
+        // Push to talk - mouse events
+        micBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            startRecordingPTT();
+        });
+        micBtn.addEventListener('mouseup', stopRecordingPTT);
+        micBtn.addEventListener('mouseleave', () => {
+            if (isRecording) stopRecordingPTT();
+        });
+        
+        // Push to talk - touch events (mobile)
+        micBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startRecordingPTT();
+        });
+        micBtn.addEventListener('touchend', stopRecordingPTT);
+        micBtn.addEventListener('touchcancel', stopRecordingPTT);
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (isCallActive) {
+                endCall();
+            }
+        });
+    </script>
+</body>
+</html>
