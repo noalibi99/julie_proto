@@ -4,4 +4,13 @@ sounddevice>=0.5.0
 numpy>=2.0.0
 python-dotenv>=1.0.0
 webrtcvad-wheels>=2.0.0
-# Note: ElevenLabs uses urllib (built-in), no extra package needed
+
+# RAG dependencies
+langchain>=1.0.0
+langchain-qdrant>=1.0.0
+langchain-huggingface>=1.0.0
+qdrant-client>=1.10.0
+sentence-transformers>=3.0.0
+pymupdf>=1.25.0
+
+# Note: Requires Python 3.11 for torch compatibility

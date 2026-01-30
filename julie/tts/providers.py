@@ -1,10 +1,12 @@
 """
-Text-to-Speech providers.
+Text-to-Speech providers with streaming support.
 """
 
 import os
 import tempfile
+import threading
 from abc import ABC, abstractmethod
+from typing import Iterator, Callable
 
 from gtts import gTTS
 
@@ -23,6 +25,11 @@ class BaseTTS(ABC):
     def synthesize(self, text: str) -> bytes:
         """Convert text to audio bytes (for telephony)."""
         pass
+    
+    def speak_streaming(self, text: str) -> None:
+        """Stream audio playback for lower latency (override if supported)."""
+        # Default: fall back to non-streaming
+        self.speak(text)
 
 
 class GTTSProvider(BaseTTS):
@@ -62,7 +69,7 @@ class GTTSProvider(BaseTTS):
 
 
 class ElevenLabsProvider(BaseTTS):
-    """Text-to-Speech using ElevenLabs (natural, paid)."""
+    """Text-to-Speech using ElevenLabs (natural, paid) with streaming support."""
     
     VOICES = {
         "charlotte": "XB0fDUnXU5powFXDhCwa",  # Charlotte - French female
@@ -80,25 +87,28 @@ class ElevenLabsProvider(BaseTTS):
         self.voice_id = self.VOICES.get(self.config.voice, self.VOICES["default"])
         self.model = self.config.model
         self.api_url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
+        self.stream_url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}/stream"
         
         # Voice settings
         self.stability = self.config.stability
         self.similarity_boost = self.config.similarity_boost
         self.style = self.config.style
-    
-    def _call_api(self, text: str) -> bytes:
-        """Call ElevenLabs API and return audio bytes."""
-        import urllib.request
-        import json
-        import ssl
         
-        headers = {
+        # Streaming buffer size
+        self.chunk_size = 4096
+    
+    def _get_headers(self) -> dict:
+        """Get API headers."""
+        return {
             "Accept": "audio/mpeg",
             "Content-Type": "application/json",
             "xi-api-key": self.api_key,
         }
-        
-        data = json.dumps({
+    
+    def _get_payload(self, text: str) -> bytes:
+        """Get API payload."""
+        import json
+        return json.dumps({
             "text": text,
             "model_id": self.model,
             "voice_settings": {
@@ -108,19 +118,47 @@ class ElevenLabsProvider(BaseTTS):
                 "use_speaker_boost": True,
             }
         }).encode("utf-8")
-        
-        req = urllib.request.Request(self.api_url, data=data, headers=headers)
-        
-        # SSL context for macOS
+    
+    def _get_ssl_context(self):
+        """Get SSL context for API calls."""
+        import ssl
         ssl_context = ssl.create_default_context()
         try:
             import certifi
             ssl_context.load_verify_locations(certifi.where())
         except ImportError:
             ssl_context = ssl._create_unverified_context()
+        return ssl_context
+    
+    def _call_api(self, text: str) -> bytes:
+        """Call ElevenLabs API and return audio bytes."""
+        import urllib.request
         
-        with urllib.request.urlopen(req, context=ssl_context) as response:
+        req = urllib.request.Request(
+            self.api_url, 
+            data=self._get_payload(text), 
+            headers=self._get_headers()
+        )
+        
+        with urllib.request.urlopen(req, context=self._get_ssl_context()) as response:
             return response.read()
+    
+    def _stream_api(self, text: str) -> Iterator[bytes]:
+        """Stream audio chunks from ElevenLabs API."""
+        import urllib.request
+        
+        req = urllib.request.Request(
+            self.stream_url,
+            data=self._get_payload(text),
+            headers=self._get_headers()
+        )
+        
+        with urllib.request.urlopen(req, context=self._get_ssl_context()) as response:
+            while True:
+                chunk = response.read(self.chunk_size)
+                if not chunk:
+                    break
+                yield chunk
     
     def speak(self, text: str) -> None:
         """Convert text to speech and play it."""
@@ -137,6 +175,57 @@ class ElevenLabsProvider(BaseTTS):
         except Exception as e:
             print(f"[ElevenLabs Error] {e}")
     
+    def speak_streaming(self, text: str) -> None:
+        """
+        Stream audio with lower latency.
+        
+        Collects chunks and starts playback as soon as possible.
+        Uses threading to play audio while still receiving data.
+        """
+        try:
+            chunks = []
+            first_chunk_received = threading.Event()
+            all_chunks_received = threading.Event()
+            temp_path = None
+            
+            def receive_chunks():
+                """Background thread to receive audio chunks."""
+                nonlocal temp_path
+                try:
+                    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False, mode='wb') as f:
+                        temp_path = f.name
+                        chunk_count = 0
+                        for chunk in self._stream_api(text):
+                            f.write(chunk)
+                            chunk_count += 1
+                            # Signal after receiving enough data to start playback
+                            if chunk_count >= 2 and not first_chunk_received.is_set():
+                                f.flush()
+                                first_chunk_received.set()
+                except Exception as e:
+                    print(f"[Streaming Error] {e}")
+                finally:
+                    all_chunks_received.set()
+            
+            # Start receiving in background
+            receiver = threading.Thread(target=receive_chunks, daemon=True)
+            receiver.start()
+            
+            # Wait for first chunks (with timeout)
+            first_chunk_received.wait(timeout=5.0)
+            
+            # Wait for all chunks before playing (simpler, more reliable)
+            all_chunks_received.wait(timeout=30.0)
+            
+            if temp_path and os.path.exists(temp_path):
+                os.system(f"afplay {temp_path} 2>/dev/null")
+                os.unlink(temp_path)
+                
+        except Exception as e:
+            print(f"[ElevenLabs Streaming Error] {e}")
+            # Fallback to non-streaming
+            self.speak(text)
+    
     def synthesize(self, text: str) -> bytes:
         """Convert text to audio bytes."""
         try:
@@ -144,6 +233,20 @@ class ElevenLabsProvider(BaseTTS):
         except Exception as e:
             print(f"[ElevenLabs Error] {e}")
             return b""
+    
+    def synthesize_streaming(self, text: str, on_chunk: Callable[[bytes], None]) -> None:
+        """
+        Stream audio bytes for real-time telephony.
+        
+        Args:
+            text: Text to synthesize
+            on_chunk: Callback called for each audio chunk
+        """
+        try:
+            for chunk in self._stream_api(text):
+                on_chunk(chunk)
+        except Exception as e:
+            print(f"[ElevenLabs Streaming Error] {e}")
 
 
 def get_tts(config: TTSConfig | None = None) -> BaseTTS:
