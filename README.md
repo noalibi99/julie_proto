@@ -1,4 +1,4 @@
-# 🎙️ Julie - Assistant Vocal Intelligent pour l'Assurance
+# Julie - Assistant Vocal Intelligent pour l'Assurance
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -1107,7 +1107,5 @@ Merci aux projets et technologies qui ont rendu Julie possible :
 <div align="center">
 
 **Fait avec ❤️ par l'équipe Julie**
-
-[ Donnez une étoile](https://github.com/votre-repo/julie) | [🐛 Signaler un bug](https://github.com/votre-repo/julie/issues) | [ Demander une fonctionnalité](https://github.com/votre-repo/julie/issues/new)
 
 </div>
