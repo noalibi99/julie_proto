@@ -147,8 +147,8 @@ Assistant vocal IA avancé pour CNP Assurances (assurance vie française), combi
 
 ```bash
 # 1. Cloner le repository
-git clone https://github.com/votre-username/julie-voice-assistant.git
-cd julie-voice-assistant
+git clone https://github.com/noalibi99/julie_proto.git
+cd julie_proto
 
 # 2. Créer et activer l'environnement virtuel
 python3.11 -m venv venv
