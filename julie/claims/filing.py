@@ -132,7 +132,6 @@ class ClaimFilingManager:
         return (
             "Je vais vous aider à enregistrer votre demande. "
             "Quel type de demande souhaitez-vous effectuer ? "
-            "Par exemple: décès, rachat partiel, rachat total, invalidité, avance, ou arbitrage."
         )
     
     def process_input(self, user_text: str) -> tuple[bool, str]:
@@ -194,8 +193,6 @@ class ClaimFilingManager:
         
         return False, (
             "Je n'ai pas compris le type de demande. "
-            "Les types possibles sont: décès, rachat partiel, rachat total, invalidité, avance, ou arbitrage. "
-            "Lequel souhaitez-vous ?"
         )
     
     def _process_name(self, text: str) -> tuple[bool, str]:
