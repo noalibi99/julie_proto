@@ -138,6 +138,28 @@ class ClaimsService:
         """Get formatted list of claim types for prompts."""
         return ", ".join([ct.value for ct in ClaimType])
     
+    def get_all_claims(self) -> list:
+        """
+        Get all claims as dictionaries.
+        
+        Returns:
+            List of claim dictionaries
+        """
+        claims = self.db.get_all()
+        return [
+            {
+                "claim_id": c.claim_id,
+                "full_name": c.full_name,
+                "contract_id": c.contract_id,
+                "claim_type": c.claim_type.value,
+                "status": c.status.value,
+                "description": c.description,
+                "incident_date": c.incident_date,
+                "created_at": c.created_at.isoformat() if c.created_at else None,
+            }
+            for c in claims
+        ]
+    
     def seed_mock_data(self) -> int:
         """Seed database with mock claims."""
         return self.db.seed_mock_data()

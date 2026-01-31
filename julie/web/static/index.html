@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julie - Assistant Vocal CNP Assurances</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --cnp-primary: #003366;
+            --cnp-secondary: #0066cc;
+            --cnp-accent: #00a0e3;
+            --cnp-light: #e6f3ff;
+            --cnp-dark: #001a33;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--cnp-primary) 0%, var(--cnp-dark) 100%);
+            min-height: 100vh;
+            color: var(--gray-900);
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            height: 50px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cnp-primary);
+        }
+
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            font-weight: 400;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-link.primary {
+            background: var(--cnp-primary);
+            color: white;
+        }
+
+        .nav-link.primary:hover {
+            background: var(--cnp-secondary);
+        }
+
+        .nav-link.secondary {
+            color: var(--gray-600);
+        }
+
+        .nav-link.secondary:hover {
+            background: var(--gray-100);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px 2rem 80px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, var(--cnp-accent), #4fc3f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        /* CTA Buttons */
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--cnp-primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn i {
+            font-size: 1.25rem;
+        }
+
+        /* Features */
+        .features {
+            padding: 80px 2rem;
+            background: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--gray-50);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--cnp-primary), var(--cnp-secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 1.75rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--gray-800);
+        }
+
+        .feature-card p {
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        /* Stats */
+        .stats {
+            padding: 60px 2rem;
+            background: var(--cnp-light);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--cnp-primary);
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--cnp-dark);
+            color: white;
+            padding: 40px 2rem;
+            text-align: center;
+        }
+
+        .footer p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="/static/CNP_Assurances_logo.svg.png" alt="CNP Assurances" class="logo-img">
+            <div>
+                <div class="logo-text">Julie</div>
+                <div class="logo-subtitle">Assistant Vocal IA</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="/admin" class="nav-link secondary">
+                <i class="ri-settings-3-line"></i> Administration
+            </a>
+            <a href="/voice" class="nav-link primary">
+                <i class="ri-phone-fill"></i> Appeler Julie
+            </a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Votre assistante vocale <span>intelligente</span></h1>
+        <p>
+            Julie vous accompagne 24h/24 pour répondre à vos questions sur l'assurance vie, 
+            suivre vos demandes et vous guider dans vos démarches.
+        </p>
+        <div class="cta-buttons">
+            <a href="/voice" class="btn btn-primary">
+                <i class="ri-phone-fill"></i>
+                Appeler Julie
+            </a>
+            <a href="/admin" class="btn btn-secondary">
+                <i class="ri-dashboard-line"></i>
+                Tableau de bord
+            </a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="ri-question-answer-line"></i>
+                </div>
+                <h3>Questions & Réponses</h3>
+                <p>Obtenez des réponses instantanées sur vos contrats d'assurance vie, les garanties et les procédures.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="ri-file-list-3-line"></i>
+                </div>
+                <h3>Suivi des Demandes</h3>
+                <p>Consultez l'état de vos demandes en cours : rachat, sinistre, avance sur contrat.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="ri-add-circle-line"></i>
+                </div>
+                <h3>Nouvelles Demandes</h3>
+                <p>Déposez une nouvelle demande guidée pas à pas par Julie.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="ri-customer-service-2-line"></i>
+                </div>
+                <h3>Transfert Conseiller</h3>
+                <p>Besoin d'aide personnalisée ? Julie vous met en relation avec un conseiller.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-calls">-</div>
+                <div class="stat-label">Conversations</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-resolution">-</div>
+                <div class="stat-label">Taux de résolution</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-docs">-</div>
+                <div class="stat-label">Documents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">Disponibilité</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>© 2026 CNP Assurances - Julie Assistant Vocal IA - Tous droits réservés</p>
+    </footer>
+
+    <script>
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                document.getElementById('stat-calls').textContent = data.total_calls || '0';
+                document.getElementById('stat-resolution').textContent = 
+                    (data.resolution_rate || 0).toFixed(0) + '%';
+                document.getElementById('stat-docs').textContent = data.total_documents || '0';
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+        
+        loadStats();
+    </script>
+</body>
+</html>

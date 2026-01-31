@@ -1,82 +1,71 @@
 # Julie - French Insurance Voice Assistant
 
-AI-powered voice assistant for a French insurance company.
+AI-powered voice assistant for CNP Assurances (French life insurance).
 
-## Architecture
+## Overview
 
-```
-julie/
-├── config.py           # Configuration management
-├── core/
-│   └── agent.py        # Main orchestration layer
-├── audio/
-│   └── vad.py          # Voice Activity Detection (WebRTC)
-├── stt/
-│   └── providers.py    # Speech-to-Text (Groq Whisper)
-├── llm/
-│   ├── providers.py    # Language Models (Groq)
-│   └── prompts.py      # System prompts
-├── tts/
-│   └── providers.py    # Text-to-Speech (ElevenLabs/gTTS)
-└── interfaces/
-    ├── cli.py          # Command line interface
-    └── telephony.py    # Asterisk integration (coming soon)
-```
+Julie handles customer calls with:
+- **Voice Pipeline**: WebRTC VAD → Groq Whisper STT → Groq LLM → ElevenLabs/gTTS
+- **RAG**: Qdrant vector store for insurance knowledge retrieval
+- **Claims**: Lookup status, file new claims with guided conversation
+- **Intent Classification**: Smart routing (greeting, claim status, file claim, transfer, etc.)
+- **Web Interface**: Admin panel + push-to-talk voice call simulation
 
-## Features
-
-- **STT**: Groq Whisper (whisper-large-v3-turbo)
-- **VAD**: WebRTC VAD for reliable speech detection
-- **LLM**: Groq (llama-3.3-70b-versatile) with insurance knowledge
-- **TTS**: ElevenLabs (natural) or gTTS (fallback)
-
-## Setup
+## Quick Start
 
 ```bash
-# Create virtual environment
-python3 -m venv venv
+# Clone and setup
+git clone <repo-url> && cd julieee
+python3.11 -m venv venv
 source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
 
-# Set up environment
+# Configure
 cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
-```
-
-## Run
-
-```bash
-source venv/bin/activate
-python main.py              # Run CLI interface
-python main.py --help       # Show options
-python julie.py             # Legacy single-file version
+# Add your API keys to .env
 ```
 
 ## Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GROQ_API_KEY` | Yes | Groq API key for STT and LLM |
-| `ELEVENLABS_API_KEY` | No | ElevenLabs API key (falls back to gTTS) |
+| `GROQ_API_KEY` | Yes | Groq API (STT + LLM) |
+| `ELEVENLABS_API_KEY` | No | ElevenLabs TTS (falls back to gTTS) |
 
-## Usage
+## Run
 
-Just speak! Julie will:
-1. Listen for your voice (WebRTC VAD detects speech)
-2. Transcribe with Whisper
-3. Respond using the LLM
-4. Speak the response back
+```bash
+source venv/bin/activate
 
-Say "au revoir" to exit.
+# CLI voice assistant
+python main.py
 
-## Roadmap
+# Web interface (admin + voice)
+python run_web.py
+# Open http://localhost:8000
+```
 
-- [x] Core pipeline (STT → LLM → TTS)
-- [x] WebRTC VAD for speech detection
-- [x] ElevenLabs professional voice
-- [x] Modular architecture
-- [ ] RAG knowledge base (Qdrant)
-- [ ] Telephony integration (Asterisk)
-- [ ] Backend API integration
+## Project Structure
+
+```
+julie/
+├── core/           # Agent orchestration, intents, logging
+├── audio/          # WebRTC VAD
+├── stt/            # Groq Whisper
+├── llm/            # Groq LLM + prompts
+├── tts/            # ElevenLabs / gTTS
+├── rag/            # Qdrant + LangChain retrieval
+├── claims/         # Claims database + filing flow
+└── web/            # FastAPI backend + static frontend
+```
+
+## Tests
+
+```bash
+pytest -v
+```
+
+## Web Interface
+
+- **Admin** (`/admin`): Upload docs, view stats, manage claims
+- **Voice** (`/voice`): Push-to-talk call simulation with Julie

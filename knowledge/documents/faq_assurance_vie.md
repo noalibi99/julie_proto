@@ -14,7 +14,7 @@ L'assurance vie bénéficie d'une fiscalité avantageuse :
 
 ### Quel est le montant minimum pour ouvrir un contrat ?
 
-Le versement initial minimum pour ouvrir un contrat d'assurance vie CNP est de 500 €. Les versements libres ultérieurs sont possibles à partir de 150 €.
+Le versement initial minimum pour ouvrir un contrat d'assurance vie CNP est de 500 €. Les versements libres ultérieurs sont possibles à partir de 150 €.python -m uvicorn julie.web.app:app --reload --host 0.0.0.0 --port 8000
 
 ### Puis-je effectuer des versements programmés ?
 
@@ -47,7 +47,6 @@ En cas de décès, le capital est versé aux bénéficiaires désignés. Les bé
 ### Comment déclarer un sinistre (décès) ?
 
 Pour déclarer un décès, vous pouvez :
-- Appeler notre numéro dédié : 0 800 300 400 (gratuit)
 - Envoyer un courrier avec l'acte de décès à : CNP Assurances, Service Sinistres, 4 place Raoul Dautry, 75015 Paris
 - Nous contacter via votre espace client
 
@@ -65,7 +64,7 @@ Oui, la loi Pacte permet le transfert de contrats d'assurance vie entre assureur
 ### Comment contacter le service client ?
 
 Vous pouvez nous contacter :
-- Par téléphone : 01 42 18 88 88 (du lundi au vendredi, 8h-20h, samedi 9h-17h)
+- Par téléphone : 01 41 98 55 59 (du lundi au vendredi, 8h-20h, samedi 9h-17h)
 - Par email : contact@cnp.fr
 - Via votre espace client en ligne
 - Par courrier : CNP Assurances, 4 place Raoul Dautry, 75015 Paris

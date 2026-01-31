@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julie - Administration</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        :root {
+            --cnp-primary: #003366;
+            --cnp-secondary: #0066cc;
+            --cnp-accent: #00a0e3;
+            --cnp-light: #e6f3ff;
+            --cnp-dark: #001a33;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-img {
+            height: 45px;
+            width: auto;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: var(--gray-500);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--gray-400);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: var(--gray-600);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        .nav-item.active {
+            background: var(--cnp-light);
+            color: var(--cnp-primary);
+        }
+
+        .nav-item i {
+            font-size: 1.25rem;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .sidebar-footer a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-500);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .page-subtitle {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--gray-200);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-card-icon.blue { background: var(--cnp-light); color: var(--cnp-primary); }
+        .stat-card-icon.green { background: #d1fae5; color: var(--success); }
+        .stat-card-icon.yellow { background: #fef3c7; color: var(--warning); }
+        .stat-card-icon.purple { background: #ede9fe; color: #7c3aed; }
+
+        .stat-card-icon i {
+            font-size: 1.25rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--cnp-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--cnp-secondary);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: var(--error);
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--gray-300);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--cnp-primary);
+            background: var(--cnp-light);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--cnp-primary);
+            background: var(--cnp-light);
+        }
+
+        .upload-zone i {
+            font-size: 3rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+
+        .upload-zone p {
+            color: var(--gray-600);
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .table th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--gray-50);
+        }
+
+        .table td {
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+
+        .table tr:hover td {
+            background: var(--gray-50);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: var(--cnp-light); color: var(--cnp-primary); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1rem;
+            color: var(--gray-500);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--gray-700);
+        }
+
+        .tab.active {
+            color: var(--cnp-primary);
+            border-bottom-color: var(--cnp-primary);
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--gray-900);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--error); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gray-300);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="logo">
+                <img src="/static/CNP_Assurances_logo.svg.png" alt="CNP Assurances" class="logo-img">
+                <div>
+                    <div class="logo-text">Julie</div>
+                    <div class="logo-subtitle">Administration</div>
+                </div>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Général</div>
+                <a class="nav-item active" data-page="dashboard">
+                    <i class="ri-dashboard-line"></i>
+                    Tableau de bord
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Base de connaissances</div>
+                <a class="nav-item" data-page="documents">
+                    <i class="ri-file-text-line"></i>
+                    Documents
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Suivi</div>
+                <a class="nav-item" data-page="calls">
+                    <i class="ri-phone-line"></i>
+                    Historique appels
+                </a>
+                <a class="nav-item" data-page="claims">
+                    <i class="ri-file-list-3-line"></i>
+                    Demandes
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/voice">
+                <i class="ri-mic-line"></i>
+                Tester Julie
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Dashboard Page -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Tableau de bord</h1>
+                    <p class="page-subtitle">Vue d'ensemble de l'activité de Julie</p>
+                </div>
+                <button class="btn btn-primary" onclick="refreshStats()">
+                    <i class="ri-refresh-line"></i>
+                    Actualiser
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon blue">
+                            <i class="ri-phone-line"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="stat-calls">-</div>
+                    <div class="stat-label">Conversations (30j)</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon green">
+                            <i class="ri-check-double-line"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="stat-resolution">-</div>
+                    <div class="stat-label">Taux de résolution</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon yellow">
+                            <i class="ri-file-text-line"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="stat-documents">-</div>
+                    <div class="stat-label">Documents</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <div class="stat-card-icon purple">
+                            <i class="ri-file-list-3-line"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="stat-claims">-</div>
+                    <div class="stat-label">Demandes créées</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Dernières conversations</h2>
+                    <a class="nav-item" data-page="calls" style="padding: 0;">Voir tout →</a>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="table" id="recent-calls-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Durée</th>
+                                <th>Tours</th>
+                                <th>Résultat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents Page -->
+        <div class="page" id="page-documents">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Base de connaissances</h1>
+                    <p class="page-subtitle">Gérez les documents utilisés par Julie</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Uploader un document</h2>
+                </div>
+                <div class="card-body">
+                    <div class="upload-zone" id="uploadZone">
+                        <i class="ri-upload-cloud-2-line"></i>
+                        <p><strong>Glissez vos fichiers ici</strong> ou cliquez pour sélectionner</p>
+                        <p style="font-size: 0.85rem; color: var(--gray-400); margin-top: 0.5rem;">
+                            Formats acceptés: .txt, .md, .pdf
+                        </p>
+                        <input type="file" id="fileInput" accept=".txt,.md,.pdf" multiple>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Documents</h2>
+                    <button class="btn btn-secondary btn-sm" onclick="loadDocuments()">
+                        <i class="ri-refresh-line"></i>
+                        Actualiser
+                    </button>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <table class="table" id="documents-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Taille</th>
+                                <th>Ajouté le</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calls Page -->
+        <div class="page" id="page-calls">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Historique des conversations</h1>
+                    <p class="page-subtitle">Consultez les échanges avec Julie</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body" style="padding: 0;">
+                    <table class="table" id="calls-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Durée</th>
+                                <th>Tours</th>
+                                <th>Résultat</th>
+                                <th>Demandes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claims Page -->
+        <div class="page" id="page-claims">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Demandes</h1>
+                    <p class="page-subtitle">Demandes créées via Julie</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body" style="padding: 0;">
+                    <table class="table" id="claims-table">
+                        <thead>
+                            <tr>
+                                <th>Référence</th>
+                                <th>Type</th>
+                                <th>Client</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <i class="ri-check-line"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                
+                // Update nav
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update pages
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(`page-${page}`).classList.add('active');
+                
+                // Load data
+                if (page === 'documents') loadDocuments();
+                if (page === 'calls') loadCalls();
+                if (page === 'claims') loadClaims();
+            });
+        });
+
+        // Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toast.className = `toast ${type}`;
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Format file size
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Outcome badge
+        function getOutcomeBadge(outcome) {
+            const badges = {
+                'resolved': '<span class="badge badge-success">Résolu</span>',
+                'transferred': '<span class="badge badge-warning">Transféré</span>',
+                'abandoned': '<span class="badge badge-error">Abandonné</span>',
+                'error': '<span class="badge badge-error">Erreur</span>',
+            };
+            return badges[outcome] || `<span class="badge badge-info">${outcome}</span>`;
+        }
+
+        // Load Stats
+        async function refreshStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                document.getElementById('stat-calls').textContent = data.total_calls || '0';
+                document.getElementById('stat-resolution').textContent = 
+                    (data.resolution_rate || 0).toFixed(0) + '%';
+                document.getElementById('stat-documents').textContent = data.total_documents || '0';
+                document.getElementById('stat-claims').textContent = data.total_claims || '0';
+                
+                showToast('Statistiques actualisées');
+            } catch (e) {
+                showToast('Erreur de chargement', 'error');
+            }
+        }
+
+        // Load Recent Calls for Dashboard
+        async function loadRecentCalls() {
+            try {
+                const response = await fetch('/api/calls?limit=5');
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#recent-calls-table tbody');
+                tbody.innerHTML = data.calls.map(call => `
+                    <tr>
+                        <td>${formatDate(call.start_time)}</td>
+                        <td>${call.duration_seconds ? call.duration_seconds.toFixed(0) + 's' : '-'}</td>
+                        <td>${call.total_turns}</td>
+                        <td>${getOutcomeBadge(call.outcome)}</td>
+                    </tr>
+                `).join('') || '<tr><td colspan="4" class="empty-state">Aucun appel</td></tr>';
+            } catch (e) {
+                console.error('Error loading recent calls:', e);
+            }
+        }
+
+        // Load Documents
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents');
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#documents-table tbody');
+                
+                if (data.documents.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <i class="ri-file-text-line"></i>
+                                    <p>Aucun document</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = data.documents.map(doc => `
+                    <tr>
+                        <td><i class="ri-file-text-line"></i> ${doc.filename}</td>
+                        <td><span class="badge badge-info">${doc.type}</span></td>
+                        <td>${formatSize(doc.size)}</td>
+                        <td>${formatDate(doc.uploaded_at)}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteDocument('${doc.filename}')">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                showToast('Erreur de chargement des documents', 'error');
+            }
+        }
+
+        // Upload Document
+        async function uploadDocument(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail);
+                }
+                
+                const data = await response.json();
+                showToast(data.message);
+                loadDocuments();
+                refreshStats();
+            } catch (e) {
+                showToast(e.message || 'Erreur d\'upload', 'error');
+            }
+        }
+
+        // Delete Document
+        async function deleteDocument(filename) {
+            if (!confirm(`Supprimer ${filename} ?`)) return;
+            
+            try {
+                await fetch(`/api/documents/${filename}`, { method: 'DELETE' });
+                showToast('Document supprimé');
+                loadDocuments();
+                refreshStats();
+            } catch (e) {
+                showToast('Erreur de suppression', 'error');
+            }
+        }
+
+        // Upload zone events
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            for (const file of files) {
+                uploadDocument(file);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            for (const file of fileInput.files) {
+                uploadDocument(file);
+            }
+            fileInput.value = '';
+        });
+
+        // Load Calls
+        async function loadCalls() {
+            try {
+                const response = await fetch('/api/calls?limit=50');
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#calls-table tbody');
+                
+                if (data.calls.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <i class="ri-phone-line"></i>
+                                    <p>Aucun appel</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = data.calls.map(call => `
+                    <tr>
+                        <td style="font-family: monospace; font-size: 0.8rem;">${call.call_id.substring(0, 8)}...</td>
+                        <td>${formatDate(call.start_time)}</td>
+                        <td>${call.duration_seconds ? call.duration_seconds.toFixed(0) + 's' : '-'}</td>
+                        <td>${call.total_turns}</td>
+                        <td>${getOutcomeBadge(call.outcome)}</td>
+                        <td>${call.claims_created?.length || 0}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                showToast('Erreur de chargement des appels', 'error');
+            }
+        }
+
+        // Load Claims
+        async function loadClaims() {
+            try {
+                const response = await fetch('/api/claims');
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#claims-table tbody');
+                
+                if (!data.claims || data.claims.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <i class="ri-file-list-3-line"></i>
+                                    <p>Aucune demande</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = data.claims.map(claim => `
+                    <tr>
+                        <td style="font-family: monospace;">${claim.claim_id || claim.id}</td>
+                        <td>${claim.claim_type || claim.type || '-'}</td>
+                        <td>${claim.full_name || claim.client_name || '-'}</td>
+                        <td><span class="badge badge-info">${claim.status || '-'}</span></td>
+                        <td>${formatDate(claim.created_at || claim.date)}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                showToast('Erreur de chargement des demandes', 'error');
+            }
+        }
+
+        // Initialize
+        refreshStats();
+        loadRecentCalls();
+    </script>
+</body>
+</html>
